@@ -43,11 +43,11 @@
 
 ## P4 - Evaluation
 
-- [ ] synthetic evaluation dataset
-- [ ] expected-result representation
-- [ ] result-based correctness comparison
-- [ ] distinguish generation/validation/execution/correctness metrics
-- [ ] record evaluation evidence without overstating model quality
+- [x] synthetic evaluation dataset
+- [x] expected-result representation
+- [x] result-based correctness comparison
+- [x] distinguish generation/validation/execution/correctness metrics
+- [x] record evaluation evidence without overstating model quality
 
 ## P5 - Runtime and publication
 
