@@ -6,40 +6,40 @@
 - [x] define project scope
 - [x] define architecture and trust boundaries
 - [x] record current state
-- [ ] add setup and dependency definition
-- [ ] add minimal FastAPI application
-- [ ] add CI
+- [x] add setup and dependency definition
+- [x] add minimal FastAPI application
+- [x] add CI
 
 ## P1 - Multi-user backend baseline
 
-- [ ] synthetic user model / authentication boundary
-- [ ] workspace model
-- [ ] create/list/read workspace APIs
-- [ ] server-side ownership resolution
-- [ ] cross-user access denial tests
-- [ ] query-history ownership boundary
+- [x] synthetic user model / authentication boundary
+- [x] workspace model
+- [x] create/list/read workspace APIs
+- [x] server-side ownership resolution
+- [x] cross-user access denial tests
+- [x] query-history ownership boundary
 
 ## P2 - Text2SQL lifecycle
 
-- [ ] `Text2SqlModel` interface
-- [ ] deterministic fixture model for CI
-- [ ] question -> candidate SQL flow
-- [ ] explicit query/attempt lifecycle states
-- [ ] generation failure classification
-- [ ] retry relationship without overwriting prior attempts
+- [x] `Text2SqlModel` interface
+- [x] deterministic fixture model for CI
+- [x] question -> candidate SQL flow
+- [x] explicit query/attempt lifecycle states
+- [x] generation failure classification
+- [x] retry relationship without overwriting prior attempts
 
 ## P3 - SQL policy and execution
 
-- [ ] parse SQL as structured syntax rather than regex-only validation
-- [ ] SELECT/query-only policy
-- [ ] single-statement policy
-- [ ] schema/table allowlist
-- [ ] row-limit policy
-- [ ] execution timeout
-- [ ] read-only database credential
-- [ ] validation failure classification
-- [ ] execution failure classification
-- [ ] prove unsafe SQL causes zero execution
+- [x] parse SQL as structured syntax rather than regex-only validation
+- [x] SELECT/query-only policy
+- [x] single-statement policy
+- [x] schema/table allowlist
+- [x] row-limit policy
+- [x] execution timeout boundary
+- [ ] PostgreSQL read-only database role / credential
+- [x] validation failure classification
+- [ ] deterministic execution failure test
+- [x] prove unsafe SQL causes zero execution
 
 ## P4 - Evaluation
 
@@ -53,11 +53,19 @@
 
 - [ ] Docker-based local environment
 - [ ] PostgreSQL synthetic fixture initialization
-- [ ] deterministic integration/E2E suite
-- [ ] public GitHub Actions verification
+- [x] deterministic integration/E2E suite for the current SQLite slice
+- [x] public GitHub Actions verification
 - [ ] optional bounded real-model E2E
-- [ ] security/disclosure review
+- [ ] security/disclosure review before portfolio publication
 - [ ] portfolio integration only after implementation evidence exists
+
+## P6 - Production-like auth and concurrency evidence (later, only if useful)
+
+- [ ] external identity-provider adapter or standards-based auth integration
+- [ ] concurrent workspace/query isolation test
+- [ ] connection-pool/resource-bound evidence
+
+These are not required to call the current synthetic multi-user authorization boundary implemented.
 
 ## Non-goals unless a demonstrated need appears
 
