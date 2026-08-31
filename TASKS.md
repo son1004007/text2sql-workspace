@@ -38,7 +38,7 @@
 - [x] execution timeout boundary
 - [ ] PostgreSQL read-only database role / credential
 - [x] validation failure classification
-- [ ] deterministic execution failure test
+- [x] deterministic execution failure test
 - [x] prove unsafe SQL causes zero execution
 
 ## P4 - Evaluation
