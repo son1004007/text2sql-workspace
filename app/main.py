@@ -29,16 +29,13 @@ def create_app(
     resolved_settings = settings or Settings.from_env()
     database = Database(resolved_settings.metadata_database_url)
     resolved_model = model or FixtureText2SqlModel()
+    initialize_default_analytics = executor is None
 
-    if executor is None:
-        initialize_synthetic_analytics_db(resolved_settings.analytics_database_path)
-        resolved_executor: QueryExecutor = SqliteReadOnlyQueryExecutor(
-            database_path=resolved_settings.analytics_database_path,
-            max_result_rows=resolved_settings.max_result_rows,
-            timeout_seconds=resolved_settings.query_timeout_seconds,
-        )
-    else:
-        resolved_executor = executor
+    resolved_executor: QueryExecutor = executor or SqliteReadOnlyQueryExecutor(
+        database_path=resolved_settings.analytics_database_path,
+        max_result_rows=resolved_settings.max_result_rows,
+        timeout_seconds=resolved_settings.query_timeout_seconds,
+    )
 
     service = Text2SqlWorkspaceService(
         database=database,
@@ -49,6 +46,8 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
+        if initialize_default_analytics:
+            initialize_synthetic_analytics_db(resolved_settings.analytics_database_path)
         service.initialize()
         yield
 
