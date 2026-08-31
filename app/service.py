@@ -75,7 +75,7 @@ class Text2SqlWorkspaceService:
             session.add(query)
             session.flush()
 
-            attempt = QueryAttempt(query_id=query.id, attempt_number=1)
+            attempt = QueryAttempt(query=query, attempt_number=1)
             session.add(attempt)
             session.flush()
             self._run_attempt(attempt, question=query.question)
@@ -94,7 +94,7 @@ class Text2SqlWorkspaceService:
             attempts = list(query.attempts)
             previous = attempts[-1] if attempts else None
             attempt = QueryAttempt(
-                query_id=query.id,
+                query=query,
                 attempt_number=(previous.attempt_number + 1 if previous else 1),
                 retry_of_attempt_id=(previous.id if previous else None),
             )
