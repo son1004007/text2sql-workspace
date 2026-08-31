@@ -1,10 +1,10 @@
 # Current State
 
 - date: 2026-08-31
-- phase: multi-user Text2SQL + PostgreSQL Docker runtime verification
+- phase: publication-ready deterministic PostgreSQL evidence
 - public repository: yes
 - implementation status: P1-P4 implemented; bounded P5 Docker/PostgreSQL runtime implemented
-- verification status: feature-branch GitHub Actions PASS for both Python tests and Docker/PostgreSQL E2E
+- verification status: feature-branch GitHub Actions PASS for both Python tests and Docker/PostgreSQL E2E; public disclosure review completed
 
 ## Confirmed decisions
 
@@ -21,6 +21,7 @@
 - generation, validation, execution and correctness are separate outcomes
 - core automated tests must not require a paid or external LLM
 - company code, schema, SQL, prompts and data are excluded from this repository
+- external real-model evaluation is optional and must not block publication of deterministic backend/runtime evidence
 
 ## Implemented and tested
 
@@ -126,6 +127,12 @@ The Docker/PostgreSQL gate caught two assumptions that the SQLite-only path coul
 
 These fixes are retained as runtime portability evidence rather than hidden as test-only adjustments.
 
+## Public disclosure review
+
+The repository was reviewed before portfolio publication for confidential code/data, internal endpoints and real credential material. The implementation remains synthetic and independently designed. Local Compose credential defaults are explicitly demo-only and are not production secret-management evidence.
+
+See [`docs/SECURITY_DISCLOSURE_REVIEW.md`](docs/SECURITY_DISCLOSURE_REVIEW.md).
+
 ## Not yet claimed
 
 - production authentication or external IdP integration
@@ -137,6 +144,7 @@ These fixes are retained as runtime portability evidence rather than hidden as t
 
 ## Next gate
 
-1. complete final public security/disclosure review for portfolio publication
-2. decide whether a bounded external-model adapter adds evidence beyond the deterministic pipeline
-3. integrate this project into the engineering portfolio only after that review
+1. merge only after the final documentation head again passes both Python and Docker/PostgreSQL CI jobs
+2. verify the same two jobs on `main`
+3. integrate the bounded evidence into the engineering portfolio
+4. add an external-model adapter later only if it contributes distinct evidence
