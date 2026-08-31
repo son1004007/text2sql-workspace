@@ -12,6 +12,7 @@ from app.analytics import (
 from app.api import router
 from app.config import Settings
 from app.database import Database
+from app.evaluation import EvaluationRunner
 from app.service import Text2SqlWorkspaceService
 from app.sql_policy import SqlPolicyValidator
 from app.text2sql import FixtureText2SqlModel, Text2SqlModel
@@ -36,11 +37,17 @@ def create_app(
         max_result_rows=resolved_settings.max_result_rows,
         timeout_seconds=resolved_settings.query_timeout_seconds,
     )
+    validator = SqlPolicyValidator(allowed_tables=ALLOWED_ANALYTICS_TABLES)
 
     service = Text2SqlWorkspaceService(
         database=database,
         model=resolved_model,
-        validator=SqlPolicyValidator(allowed_tables=ALLOWED_ANALYTICS_TABLES),
+        validator=validator,
+        executor=resolved_executor,
+    )
+    evaluation_runner = EvaluationRunner(
+        model=resolved_model,
+        validator=validator,
         executor=resolved_executor,
     )
 
@@ -54,11 +61,12 @@ def create_app(
     application = FastAPI(
         title="Text2SQL Workspace",
         description="Multi-user LLM Data Query Service",
-        version="0.2.0",
+        version="0.3.0",
         lifespan=lifespan,
     )
     application.state.settings = resolved_settings
     application.state.service = service
+    application.state.evaluation_runner = evaluation_runner
     application.include_router(router)
 
     @application.get("/health", tags=["system"])
