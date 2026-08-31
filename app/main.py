@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.analytics import (
+    PostgresReadOnlyQueryExecutor,
     QueryExecutor,
     SqliteReadOnlyQueryExecutor,
     initialize_synthetic_analytics_db,
@@ -30,13 +31,24 @@ def create_app(
     resolved_settings = settings or Settings.from_env()
     database = Database(resolved_settings.metadata_database_url)
     resolved_model = model or FixtureText2SqlModel()
-    initialize_default_analytics = executor is None
+    initialize_default_sqlite = False
 
-    resolved_executor: QueryExecutor = executor or SqliteReadOnlyQueryExecutor(
-        database_path=resolved_settings.analytics_database_path,
-        max_result_rows=resolved_settings.max_result_rows,
-        timeout_seconds=resolved_settings.query_timeout_seconds,
-    )
+    if executor is not None:
+        resolved_executor = executor
+    elif resolved_settings.analytics_database_url:
+        resolved_executor = PostgresReadOnlyQueryExecutor(
+            dsn=resolved_settings.analytics_database_url,
+            max_result_rows=resolved_settings.max_result_rows,
+            timeout_seconds=resolved_settings.query_timeout_seconds,
+        )
+    else:
+        initialize_default_sqlite = True
+        resolved_executor = SqliteReadOnlyQueryExecutor(
+            database_path=resolved_settings.analytics_database_path,
+            max_result_rows=resolved_settings.max_result_rows,
+            timeout_seconds=resolved_settings.query_timeout_seconds,
+        )
+
     validator = SqlPolicyValidator(allowed_tables=ALLOWED_ANALYTICS_TABLES)
 
     service = Text2SqlWorkspaceService(
@@ -53,7 +65,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
-        if initialize_default_analytics:
+        if initialize_default_sqlite:
             initialize_synthetic_analytics_db(resolved_settings.analytics_database_path)
         service.initialize()
         yield
@@ -61,7 +73,7 @@ def create_app(
     application = FastAPI(
         title="Text2SQL Workspace",
         description="Multi-user LLM Data Query Service",
-        version="0.3.0",
+        version="0.4.0",
         lifespan=lifespan,
     )
     application.state.settings = resolved_settings
