@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 import json
 import math
 from pathlib import Path
@@ -171,6 +172,7 @@ def _row_matches(expected: tuple[object, ...], actual: tuple[object, ...]) -> bo
 
 
 def _value_matches(expected: object, actual: object) -> bool:
-    if isinstance(expected, (int, float)) and isinstance(actual, (int, float)):
+    numeric_types = (int, float, Decimal)
+    if isinstance(expected, numeric_types) and isinstance(actual, numeric_types):
         return math.isclose(float(expected), float(actual), rel_tol=1e-9, abs_tol=1e-9)
     return expected == actual
