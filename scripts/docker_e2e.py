@@ -139,8 +139,11 @@ def verify_runtime_boundaries() -> None:
     app_port = compose("port", "app", "8000").stdout.strip()
     assert app_port == "127.0.0.1:18000", app_port
 
-    postgres_port = compose("port", "postgres", "5432", check=False)
-    assert postgres_port.returncode != 0 or not postgres_port.stdout.strip(), postgres_port.stdout
+    # Compose reports an exposed-but-unpublished container port as `:0` on
+    # current GitHub-hosted runners. Any concrete host port here would mean
+    # the PostgreSQL service escaped the intended container-only boundary.
+    postgres_port = compose("port", "postgres", "5432", check=False).stdout.strip()
+    assert postgres_port in {"", ":0"}, postgres_port
 
     read = compose(
         "exec",
