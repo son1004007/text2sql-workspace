@@ -4,7 +4,25 @@
 
 Text2SQL Workspace is a public, independently reproducible Python/FastAPI backend project for multi-user natural-language data queries.
 
-The service does not treat LLM-generated SQL as trusted output. A request moves through explicit generation, validation, read-only execution and evaluation boundaries, while each user's workspace, query history and results remain isolated from other users.
+The service does not treat LLM-generated SQL as trusted output. A request moves through explicit generation, validation and read-only execution boundaries, while each user's workspace, query history and results remain isolated from other users.
+
+## Verified in the current MVP slice
+
+The current implementation has CI-backed coverage for:
+
+- synthetic signed bearer-token identity for two demo users
+- workspace create/list/read APIs with server-side ownership resolution
+- cross-user workspace and query access denial
+- persistent query history and retry attempts without overwriting prior attempts
+- replaceable `Text2SqlModel` interface with deterministic fixture model
+- natural-language question -> candidate SQL -> SQLGlot policy validation -> read-only query execution
+- single-statement, SELECT-only and table-allowlist policy
+- separate synthetic commerce analytics database
+- bounded result rows and SQLite read-only/query-only execution
+- explicit generation, validation and execution failure states
+- proof that unsafe generated SQL is rejected before the executor is invoked
+
+The demo-token endpoint is intentionally **not production authentication**. It exists to make authenticated identity and authorization/isolation behavior reproducible in CI. Production identity-provider integration is outside the current evidence boundary.
 
 ## What this project is intended to prove
 
@@ -13,22 +31,21 @@ The service does not treat LLM-generated SQL as trusted output. A request moves 
 - LLM integration behind a replaceable model interface
 - server-side validation of generated SQL before database execution
 - read-only and resource-bounded query execution
-- explicit failure classification across generation, validation, execution and evaluation
+- explicit failure classification across generation, validation and execution
 - reproducible query history and retry relationships
 - deterministic automated tests that do not require an external paid LLM
 
 ## Core flow
 
 ```text
-User
-  -> Workspace
+Authenticated user
+  -> owned Workspace
   -> Natural-language question
-  -> Context selection
   -> Text2SQL model
-  -> SQL validation
+  -> SQL policy validation
   -> Read-only execution
-  -> Result / evaluation
-  -> Query history
+  -> Result
+  -> Query / attempt history
 ```
 
 A generated SQL string is not considered a successful request by itself.
@@ -40,22 +57,30 @@ generation success
 != result correctness
 ```
 
-## Initial MVP
+Result correctness evaluation is the next major capability; it is not yet claimed as implemented.
 
-1. user authentication
-2. workspace creation and ownership checks
-3. query creation and history
-4. replaceable Text2SQL model adapter
-5. SELECT-only SQL validation
-6. allow-listed schema/table boundary
-7. single-statement enforcement
-8. row-limit and execution-time boundary
-9. read-only database access
-10. explicit request states and failure reasons
-11. deterministic evaluation fixtures
-12. authorization, unsafe-SQL and model-failure E2E tests
-13. Docker-based local execution
-14. CI verification
+## Current API surface
+
+```text
+POST /api/v1/auth/demo-token
+POST /api/v1/workspaces
+GET  /api/v1/workspaces
+GET  /api/v1/workspaces/{workspace_id}
+POST /api/v1/workspaces/{workspace_id}/queries
+GET  /api/v1/workspaces/{workspace_id}/queries
+GET  /api/v1/workspaces/{workspace_id}/queries/{query_id}
+POST /api/v1/workspaces/{workspace_id}/queries/{query_id}/retry
+```
+
+## Current synthetic questions
+
+The deterministic model exists for reproducible CI and currently includes examples such as:
+
+- `월별 주문 건수`
+- `카테고리별 매출`
+- `테이블 삭제 테스트` — intentionally returns unsafe SQL so the validation boundary can be tested
+
+An external LLM adapter will be added only after the deterministic service and evaluation gates are stable.
 
 ## Security and disclosure boundary
 
@@ -63,6 +88,6 @@ This repository uses only synthetic or public data and independently designed co
 
 It does not contain company-owned source code, database schemas, SQL, prompts, customer identifiers, internal URLs, credentials or datasets.
 
-## Planned status
+SQLite is currently used for deterministic public CI. PostgreSQL and Docker-based runtime verification remain planned and will not be claimed until implemented and tested.
 
-The repository has just been initialized. Implementation status is tracked in [`CURRENT_STATE.md`](CURRENT_STATE.md) and [`TASKS.md`](TASKS.md).
+See [`CURRENT_STATE.md`](CURRENT_STATE.md), [`TASKS.md`](TASKS.md) and [`ARCHITECTURE.md`](ARCHITECTURE.md) for the exact evidence boundary and remaining work.
