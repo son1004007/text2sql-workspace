@@ -4,9 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.auth import AuthenticatedIdentity, issue_demo_token, verify_demo_token
+from app.evaluation import EvaluationRunner
 from app.schemas import (
     AccessTokenResponse,
     DemoTokenRequest,
+    EvaluationCaseResponse,
+    EvaluationSummaryResponse,
     QueryCreate,
     QueryResponse,
     WorkspaceCreate,
@@ -21,6 +24,10 @@ bearer = HTTPBearer(auto_error=False)
 
 def get_service(request: Request) -> Text2SqlWorkspaceService:
     return request.app.state.service
+
+
+def get_evaluation_runner(request: Request) -> EvaluationRunner:
+    return request.app.state.evaluation_runner
 
 
 def current_identity(
@@ -57,6 +64,38 @@ def create_demo_token(request: Request, body: DemoTokenRequest) -> AccessTokenRe
     except ValueError as exc:
         raise HTTPException(status_code=404, detail="DEMO_USER_NOT_FOUND") from exc
     return AccessTokenResponse(access_token=token)
+
+
+@router.post(
+    "/evaluations/run",
+    response_model=EvaluationSummaryResponse,
+    tags=["evaluation"],
+)
+def run_evaluation(
+    _: AuthenticatedIdentity = Depends(current_identity),
+    runner: EvaluationRunner = Depends(get_evaluation_runner),
+) -> EvaluationSummaryResponse:
+    summary = runner.run()
+    return EvaluationSummaryResponse(
+        total=summary.total,
+        generation_success=summary.generation_success,
+        validation_success=summary.validation_success,
+        execution_success=summary.execution_success,
+        correctness_success=summary.correctness_success,
+        cases=[
+            EvaluationCaseResponse(
+                case_id=case.case_id,
+                question=case.question,
+                generation_success=case.generation_success,
+                validation_success=case.validation_success,
+                execution_success=case.execution_success,
+                correctness_success=case.correctness_success,
+                failure_code=case.failure_code,
+                candidate_sql=case.candidate_sql,
+            )
+            for case in summary.cases
+        ],
+    )
 
 
 @router.post(

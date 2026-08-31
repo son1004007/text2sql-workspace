@@ -46,3 +46,23 @@ class QueryResponse(BaseModel):
     question: str
     created_at: datetime
     attempts: list[AttemptResponse]
+
+
+class EvaluationCaseResponse(BaseModel):
+    case_id: str
+    question: str
+    generation_success: bool
+    validation_success: bool
+    execution_success: bool
+    correctness_success: bool
+    failure_code: str | None
+    candidate_sql: str | None
+
+
+class EvaluationSummaryResponse(BaseModel):
+    total: int
+    generation_success: int
+    validation_success: int
+    execution_success: int
+    correctness_success: int
+    cases: list[EvaluationCaseResponse]

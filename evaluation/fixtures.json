@@ -1,0 +1,22 @@
+[
+  {
+    "id": "monthly-order-count",
+    "question": "월별 주문 건수",
+    "expected_columns": ["order_month", "order_count"],
+    "expected_rows": [
+      ["2026-01", 2],
+      ["2026-02", 1]
+    ],
+    "ordered": true
+  },
+  {
+    "id": "sales-by-category",
+    "question": "카테고리별 매출",
+    "expected_columns": ["category", "sales"],
+    "expected_rows": [
+      ["electronics", 760.0],
+      ["office", 10.0]
+    ],
+    "ordered": true
+  }
+]

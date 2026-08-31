@@ -1,10 +1,10 @@
 # Current State
 
 - date: 2026-08-31
-- phase: multi-user Text2SQL vertical slice
+- phase: multi-user Text2SQL + result-based evaluation
 - public repository: yes
-- implementation status: P1/P2 implemented, P3 complete for deterministic SQLite slice
-- verification status: feature-branch GitHub Actions PASS, 15 tests passed on Python 3.13
+- implementation status: P1/P2/P4 implemented, P3 complete for deterministic SQLite slice
+- verification status: feature-branch GitHub Actions PASS, 19 tests passed on Python 3.13
 
 ## Confirmed decisions
 
@@ -55,9 +55,31 @@ The demo-token endpoint is a reproducible authentication fixture, not a producti
 - unsafe fixture output (`DELETE`) is proven to cause zero executor calls
 - deterministic executor failure is persisted as `EXECUTION_FAILED`
 
+### Result-based evaluation
+
+- explicit synthetic evaluation dataset
+- expected result stored as columns and rows
+- generation / validation / execution / correctness counted separately
+- correctness compares actual result semantics instead of SQL string equality
+- semantically equivalent SQL with different text is proven to pass correctness
+- policy-valid and executable SQL with the wrong result is proven to fail correctness
+- authenticated evaluation API is available at `POST /api/v1/evaluations/run`
+
+Current deterministic bounded evaluation fixture:
+
+```text
+total cases:          2
+generation success:   2
+validation success:   2
+execution success:    2
+correctness success:  2
+```
+
+This verifies the evaluation pipeline only. It is not an external-LLM accuracy claim.
+
 ## Verified scenarios
 
-The current automated suite verifies normal, failure, authorization and boundary behavior, including:
+The current automated suite verifies normal, failure, authorization, evaluation and boundary behavior, including:
 
 1. authentication required
 2. cross-user workspace denial
@@ -69,19 +91,21 @@ The current automated suite verifies normal, failure, authorization and boundary
 8. retry preserving the first attempt
 9. deterministic analytics execution failure classification
 10. direct SQL policy rejection cases
+11. equivalent SQL result correctness
+12. executable but semantically wrong SQL correctness failure
+13. authenticated evaluation endpoint and per-stage metrics
 
 ## Not yet claimed
 
 - production authentication or external IdP integration
 - PostgreSQL read-only role/credential runtime verification
 - Docker deployment
-- result-based correctness evaluation dataset and metrics
 - external/real LLM E2E
+- statistically meaningful model-quality metrics
 - production concurrency, load, SLA or large-user operation
 
 ## Next gate
 
-1. add result-based evaluation fixtures and correctness classification
-2. move synthetic analytics runtime to PostgreSQL with a dedicated read-only role
-3. add Docker Compose and bounded integration E2E
-4. only then add an optional external LLM adapter and bounded real-model evaluation
+1. move synthetic analytics runtime to PostgreSQL with a dedicated read-only role
+2. add Docker Compose and bounded integration E2E
+3. only then add an optional external LLM adapter and bounded real-model evaluation
