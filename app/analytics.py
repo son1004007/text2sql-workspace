@@ -6,6 +6,8 @@ import sqlite3
 import time
 from typing import Protocol
 
+import psycopg
+
 
 @dataclass(frozen=True)
 class QueryResult:
@@ -130,3 +132,37 @@ class SqliteReadOnlyQueryExecutor:
             raise QueryExecutionError(type(exc).__name__) from exc
         finally:
             connection.close()
+
+
+class PostgresReadOnlyQueryExecutor:
+    def __init__(
+        self,
+        *,
+        dsn: str,
+        max_result_rows: int,
+        timeout_seconds: float,
+    ):
+        self.dsn = dsn
+        self.max_result_rows = max_result_rows
+        self.timeout_seconds = timeout_seconds
+
+    def execute(self, sql: str) -> QueryResult:
+        timeout_ms = max(1, int(self.timeout_seconds * 1000))
+        bounded_sql = f"SELECT * FROM ({sql.rstrip(';')}) AS bounded_query LIMIT %s"
+
+        try:
+            with psycopg.connect(self.dsn) as connection:
+                with connection.transaction():
+                    connection.execute("SET TRANSACTION READ ONLY")
+                    connection.execute(
+                        "SELECT set_config('statement_timeout', %s, true)",
+                        (f"{timeout_ms}ms",),
+                    )
+                    cursor = connection.execute(bounded_sql, (self.max_result_rows,))
+                    columns = tuple(
+                        description.name for description in cursor.description or ()
+                    )
+                    rows = tuple(tuple(row) for row in cursor.fetchall())
+                    return QueryResult(columns=columns, rows=rows)
+        except psycopg.Error as exc:
+            raise QueryExecutionError(type(exc).__name__) from exc

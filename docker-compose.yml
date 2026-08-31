@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: analytics
+      POSTGRES_USER: analytics_admin
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-local-admin-only}
+      ANALYTICS_READER_PASSWORD: ${ANALYTICS_READER_PASSWORD:-local-reader-only}
+    volumes:
+      - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytics_admin -d analytics"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    restart: "no"
+
+  app:
+    build:
+      context: .
+    environment:
+      TEXT2SQL_METADATA_DATABASE_URL: sqlite+pysqlite:////data/metadata.db
+      TEXT2SQL_ANALYTICS_DATABASE_URL: postgresql://analytics_reader:${ANALYTICS_READER_PASSWORD:-local-reader-only}@postgres:5432/analytics
+      TEXT2SQL_AUTH_SECRET: ${TEXT2SQL_AUTH_SECRET:-local-compose-secret}
+      TEXT2SQL_MAX_RESULT_ROWS: "100"
+      TEXT2SQL_QUERY_TIMEOUT_SECONDS: "1.0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18000:8000"
+    volumes:
+      - metadata_data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2).read()",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    restart: "no"
+
+volumes:
+  postgres_data:
+  metadata_data:

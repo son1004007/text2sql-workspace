@@ -27,3 +27,16 @@ jobs:
 
       - name: Test
         run: python -m pytest
+
+  docker-postgres-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate Compose
+        run: docker compose config
+
+      - name: Run Docker PostgreSQL E2E
+        run: python scripts/docker_e2e.py
