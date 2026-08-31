@@ -36,10 +36,12 @@
 - [x] schema/table allowlist
 - [x] row-limit policy
 - [x] execution timeout boundary
-- [ ] PostgreSQL read-only database role / credential
+- [x] PostgreSQL read-only database role / credential
+- [x] explicit read-only PostgreSQL transaction
 - [x] validation failure classification
 - [x] deterministic execution failure test
 - [x] prove unsafe SQL causes zero execution
+- [x] prove PostgreSQL reader can SELECT but cannot write
 
 ## P4 - Evaluation
 
@@ -47,14 +49,20 @@
 - [x] expected-result representation
 - [x] result-based correctness comparison
 - [x] distinguish generation/validation/execution/correctness metrics
+- [x] cross-engine numeric-result comparison
 - [x] record evaluation evidence without overstating model quality
 
 ## P5 - Runtime and publication
 
-- [ ] Docker-based local environment
-- [ ] PostgreSQL synthetic fixture initialization
-- [x] deterministic integration/E2E suite for the current SQLite slice
-- [x] public GitHub Actions verification
+- [x] Docker-based local environment
+- [x] PostgreSQL synthetic fixture initialization
+- [x] non-root application container
+- [x] separate metadata state from analytics reader authority
+- [x] loopback-only application host binding in bounded runtime
+- [x] no host-published PostgreSQL port
+- [x] deterministic SQLite integration/E2E suite
+- [x] PostgreSQL Docker E2E suite
+- [x] public GitHub Actions verification for unit and Docker/PostgreSQL jobs
 - [ ] optional bounded real-model E2E
 - [ ] security/disclosure review before portfolio publication
 - [ ] portfolio integration only after implementation evidence exists
