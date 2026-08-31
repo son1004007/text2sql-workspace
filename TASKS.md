@@ -63,9 +63,11 @@
 - [x] deterministic SQLite integration/E2E suite
 - [x] PostgreSQL Docker E2E suite
 - [x] public GitHub Actions verification for unit and Docker/PostgreSQL jobs
+- [x] security/disclosure review before portfolio publication
 - [ ] optional bounded real-model E2E
-- [ ] security/disclosure review before portfolio publication
-- [ ] portfolio integration only after implementation evidence exists
+- [ ] portfolio integration
+
+The real-model gate is optional and must remain separate from deterministic CI. Portfolio publication may proceed using the verified deterministic/PostgreSQL evidence without claiming real-model quality.
 
 ## P6 - Production-like auth and concurrency evidence (later, only if useful)
 
