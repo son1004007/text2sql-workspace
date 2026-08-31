@@ -38,7 +38,7 @@ CREATE TABLE order_items (
     order_id BIGINT NOT NULL REFERENCES orders(id),
     product_id BIGINT NOT NULL REFERENCES products(id),
     quantity INTEGER NOT NULL,
-    unit_price DOUBLE PRECISION NOT NULL
+    unit_price NUMERIC(12, 2) NOT NULL
 );
 
 INSERT INTO customers(id, name) VALUES
