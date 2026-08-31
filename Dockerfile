@@ -7,6 +7,7 @@ WORKDIR /app
 
 COPY pyproject.toml README.md ./
 COPY app ./app
+COPY evaluation ./evaluation
 
 RUN python -m pip install --no-cache-dir . \
     && mkdir -p /data \
