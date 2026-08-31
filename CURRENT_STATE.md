@@ -3,8 +3,8 @@
 - date: 2026-08-31
 - phase: multi-user Text2SQL vertical slice
 - public repository: yes
-- implementation status: P1/P2 implemented, P3 partial
-- verification status: GitHub Actions test suite passing on the feature branch; final merge gate pending latest branch run
+- implementation status: P1/P2 implemented, P3 complete for deterministic SQLite slice
+- verification status: feature-branch GitHub Actions PASS, 15 tests passed on Python 3.13
 
 ## Confirmed decisions
 
@@ -53,6 +53,22 @@ The demo-token endpoint is a reproducible authentication fixture, not a producti
 - bounded returned rows
 - progress-handler execution timeout boundary
 - unsafe fixture output (`DELETE`) is proven to cause zero executor calls
+- deterministic executor failure is persisted as `EXECUTION_FAILED`
+
+## Verified scenarios
+
+The current automated suite verifies normal, failure, authorization and boundary behavior, including:
+
+1. authentication required
+2. cross-user workspace denial
+3. cross-user query denial
+4. successful natural-language -> SQL -> result flow
+5. persisted query history
+6. generation failure with zero DB execution
+7. unsafe SQL validation failure with zero DB execution
+8. retry preserving the first attempt
+9. deterministic analytics execution failure classification
+10. direct SQL policy rejection cases
 
 ## Not yet claimed
 
@@ -65,8 +81,7 @@ The demo-token endpoint is a reproducible authentication fixture, not a producti
 
 ## Next gate
 
-1. add deterministic execution-failure coverage
-2. add result-based evaluation fixtures and correctness classification
-3. move synthetic analytics runtime to PostgreSQL with a dedicated read-only role
-4. add Docker Compose and bounded integration E2E
-5. only then add an optional external LLM adapter and bounded real-model evaluation
+1. add result-based evaluation fixtures and correctness classification
+2. move synthetic analytics runtime to PostgreSQL with a dedicated read-only role
+3. add Docker Compose and bounded integration E2E
+4. only then add an optional external LLM adapter and bounded real-model evaluation
